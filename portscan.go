@@ -1,12 +1,13 @@
 package main
+
 //just for learning purpose..
 
 import (
 	"flag"
 	"fmt"
 	"net"
-	"time"
 	"strconv"
+	"time"
 )
 
 var host string
@@ -48,15 +49,13 @@ func (this *TCPLocation) IsOpen() bool {
 func main() {
 	flag.StringVar(&host, "host", "localhost", "host address")
 	flag.StringVar(&s_start, "start", "20", "start")
-	flag.StringVar(&s_end, "end", "81", "end")
+	flag.StringVar(&s_end, "end", "25", "end")
 	flag.Parse()
 
-
-	start,_:=strconv.Atoi(s_start)
-	end,_:=strconv.Atoi(s_end)
-
+	start, _ := strconv.Atoi(s_start)
+	end, _ := strconv.Atoi(s_end)
 
 	for i := start; i < end; i++ {
-		fmt.Printf("Is Open - %t\n", (&TCPLocation{&Host{host}, i}).IsOpen())	
+		fmt.Printf("Is Open - %t\n", (&TCPLocation{&Host{host}, i}).IsOpen())
 	}
 }
