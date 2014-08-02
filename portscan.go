@@ -12,36 +12,37 @@ import (
 var host string
 var start, end int
 
-type Host struct {
-	Ip string
-}
-
-func (this *Host) IsUp() bool {
-	return true
-}
-
 type TCPLocation struct {
-	Host *Host
+	Host string
 	Port int
+}
+
+type Result struct {
+	TCPLocation *TCPLocation
+	Err         string
+	IsOpen      bool
+}
+
+func (this *Result) String() string {
+	return fmt.Sprintf("{ TCPLocation:'%s', Err:'%s', IsOpen:'%t' }", this.TCPLocation, this.Err, this.IsOpen)
 }
 
 func (this *TCPLocation) String() string {
 	return fmt.Sprintf("{ host=%s, port=%d }", this.Host, this.Port)
 }
 
-func (this *TCPLocation) IsOpen() bool {
+func (this *TCPLocation) Scan() *Result {
 	var p string
-	p = fmt.Sprintf("%s:%d", this.Host.Ip, this.Port)
-	fmt.Printf("%s ", p)
-	conn, err := net.DialTimeout("tcp", p, 3*time.Second)
+	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
+	fmt.Printf("Scanning -- %s\n", p)
+	conn, err := net.DialTimeout("tcp", p, 1*time.Second)
 	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-		return false
+		return &Result{TCPLocation: this, Err: err.Error(), IsOpen: false}
 	}
 	defer func() {
 		conn.Close()
 	}()
-	return true
+	return &Result{TCPLocation: this, IsOpen: true}
 }
 
 func main() {
@@ -51,6 +52,9 @@ func main() {
 	flag.Parse()
 
 	for i := start; i < end; i++ {
-		fmt.Printf("Is Open - %t\n", (&TCPLocation{&Host{host}, i}).IsOpen())
+		result := (&TCPLocation{host, i}).Scan()
+		if result.IsOpen {
+			fmt.Printf("Is Open - %s\n", result)
+		}
 	}
 }
