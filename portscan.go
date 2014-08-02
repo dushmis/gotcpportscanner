@@ -10,7 +10,7 @@ import (
 )
 
 var host string
-var start, end int
+var start, end, timeout int
 
 type TCPLocation struct {
 	Host string
@@ -35,7 +35,7 @@ func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
 	fmt.Printf("Scanning -- %s\n", p)
-	conn, err := net.DialTimeout("tcp", p, 1*time.Second)
+	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
 	if err != nil {
 		return &Result{TCPLocation: this, Err: err.Error(), IsOpen: false}
 	}
@@ -49,6 +49,7 @@ func main() {
 	flag.StringVar(&host, "host", "localhost", "host address")
 	flag.IntVar(&start, "start", 20, "start")
 	flag.IntVar(&end, "end", 25, "end")
+	flag.IntVar(&timeout, "w", 5, "tcp timeout in seconds")
 	flag.Parse()
 
 	for i := start; i < end; i++ {
