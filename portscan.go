@@ -60,15 +60,15 @@ func _log_(logs string) {
 }
 
 func main() {
-	flag.StringVar(&host, "host", "localhost", "host address")
-	flag.IntVar(&start, "start", 20, "start")
-	flag.IntVar(&end, "end", 25, "end")
+	flag.StringVar(&host, "host", "localhost", "IP Address or host")
+	flag.IntVar(&start, "start", 20, "start port")
+	flag.IntVar(&end, "end", 25, "end port")
 	flag.IntVar(&timeout, "w", 5, "tcp timeout in seconds")
 	flag.IntVar(&port, "p", -1, "specific port, this option ignores start/end flag")
 
 	flag.BoolVar(&verbose, "v", false, "verbose")
 
-	var so = flag.Bool("s", false, "verbose")
+	var so = flag.Bool("s", false, "success only logs")
 
 	flag.Parse()
 

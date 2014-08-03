@@ -11,6 +11,9 @@ Usage
 
 ```./portscan --start=20 --end=9000 --host=google.com -w=1 -v ```
 
+```./portscan --start=20 --end=9000 --host=google.com -w=1 -v -s```
+
 ```./portscan --p=22 --host=rasp```
 
 ```./portscan```
+
