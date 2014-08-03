@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -38,6 +39,9 @@ func (this *TCPLocation) String() string {
 func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
+	// if !verbose {
+	// fmt.Printf("Scanning -- %s\n", p)
+	// }
 	_log_(fmt.Sprintf("Connecting %s", this))
 	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
 	if err != nil {
@@ -88,6 +92,8 @@ func main() {
 
 	host = IPAddr.IP.String()
 
+	var wg sync.WaitGroup
+
 	var portRange int
 
 	if portRange = end - start; portRange < 0 {
@@ -104,7 +110,8 @@ func main() {
 	}
 
 	for i := range TCPLocations {
-		func(tcpLocation *TCPLocation) {
+		wg.Add(1)
+		go func(tcpLocation *TCPLocation) {
 			result := tcpLocation.Scan()
 			_log_(fmt.Sprintf("result - %s", result))
 			if result.IsOpen {
@@ -117,6 +124,8 @@ func main() {
 					os.Exit(1)
 				}
 			}
+			defer wg.Done()
 		}(TCPLocations[i])
 	}
+	wg.Wait()
 }
