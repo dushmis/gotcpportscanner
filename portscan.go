@@ -12,6 +12,8 @@ import (
 var host string
 var start, end, timeout int
 
+var verbose bool
+
 type TCPLocation struct {
 	Host string
 	Port int
@@ -34,9 +36,13 @@ func (this *TCPLocation) String() string {
 func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
-	fmt.Printf("Scanning -- %s\n", p)
+	if !verbose {
+		fmt.Printf("Scanning -- %s\n", p)
+	}
+	log(fmt.Sprintf("Connecting %s", this))
 	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
 	if err != nil {
+		log(fmt.Sprintf("Error %s", err.Error()))
 		return &Result{TCPLocation: this, Err: err.Error(), IsOpen: false}
 	}
 	defer func() {
@@ -45,15 +51,24 @@ func (this *TCPLocation) Scan() *Result {
 	return &Result{TCPLocation: this, IsOpen: true}
 }
 
+func log(log string) {
+	if verbose {
+		fmt.Printf("[ %s ]: %s\n", time.Now().Format(time.RFC3339Nano), log)
+	}
+}
+
 func main() {
 	flag.StringVar(&host, "host", "localhost", "host address")
 	flag.IntVar(&start, "start", 20, "start")
 	flag.IntVar(&end, "end", 25, "end")
 	flag.IntVar(&timeout, "w", 5, "tcp timeout in seconds")
+	flag.BoolVar(&verbose, "v", false, "verbose")
 	flag.Parse()
-
+	log(fmt.Sprintf("scanning from %s:%d, %s:%d", host, start, host, end))
+	log(fmt.Sprintf("timeout - %d", timeout))
 	for i := start; i < end; i++ {
 		result := (&TCPLocation{host, i}).Scan()
+		log(fmt.Sprintf("result - %s", result))
 		if result.IsOpen {
 			fmt.Printf("Is Open - %s\n", result)
 		}
