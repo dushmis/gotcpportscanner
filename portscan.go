@@ -5,7 +5,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net"
+	"os"
 	"time"
 )
 
@@ -36,13 +38,13 @@ func (this *TCPLocation) String() string {
 func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
-	if !verbose {
-		fmt.Printf("Scanning -- %s\n", p)
-	}
-	log(fmt.Sprintf("Connecting %s", this))
+	// if !verbose {
+	// fmt.Printf("Scanning -- %s\n", p)
+	// }
+	_log_(fmt.Sprintf("Connecting %s", this))
 	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
 	if err != nil {
-		log(fmt.Sprintf("Error %s", err.Error()))
+		_log_(fmt.Sprintf("Error %s", err.Error()))
 		return &Result{TCPLocation: this, Err: err.Error(), IsOpen: false}
 	}
 	defer func() {
@@ -51,9 +53,9 @@ func (this *TCPLocation) Scan() *Result {
 	return &Result{TCPLocation: this, IsOpen: true}
 }
 
-func log(log string) {
+func _log_(logs string) {
 	if verbose {
-		fmt.Printf("[ %s ]: %s\n", time.Now().Format(time.RFC3339Nano), log)
+		log.Printf("\033[92m%s\033[0m\n", logs)
 	}
 }
 
@@ -67,19 +69,35 @@ func main() {
 
 	flag.Parse()
 
-	log(fmt.Sprintf("scanning from %s:%d, %s:%d", host, start, host, end))
-	log(fmt.Sprintf("timeout - %d", timeout))
+	_log_(fmt.Sprintf("scanning from %s:%d, %s:%d", host, start, host, end))
+	_log_(fmt.Sprintf("timeout - %d", timeout))
+
+	singlePort := false
 
 	if port != -1 {
 		start = port
 		end = start + 1
+		singlePort = true
 	}
+
+	IPAddr, err := net.ResolveIPAddr("ip", host)
+	if err != nil {
+		log.Fatal(err.Error())
+		os.Exit(2)
+	}
+
+	host = IPAddr.IP.String()
 
 	for i := start; i < end; i++ {
 		result := (&TCPLocation{host, i}).Scan()
-		log(fmt.Sprintf("result - %s", result))
+		_log_(fmt.Sprintf("result - %s", result))
 		if result.IsOpen {
-			fmt.Printf("Is Open - %s\n", result)
+			fmt.Printf("\033[92mSUCCESS\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+		} else {
+			fmt.Printf("\033[91mFAILURE\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+			if singlePort {
+				os.Exit(1)
+			}
 		}
 	}
 }
