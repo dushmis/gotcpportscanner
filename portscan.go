@@ -10,7 +10,7 @@ import (
 )
 
 var host string
-var start, end, timeout int
+var start, end, port, timeout int
 
 var verbose bool
 
@@ -63,9 +63,18 @@ func main() {
 	flag.IntVar(&end, "end", 25, "end")
 	flag.IntVar(&timeout, "w", 5, "tcp timeout in seconds")
 	flag.BoolVar(&verbose, "v", false, "verbose")
+	flag.IntVar(&port, "p", -1, "specific port, this option ignores start/end flag")
+
 	flag.Parse()
+
 	log(fmt.Sprintf("scanning from %s:%d, %s:%d", host, start, host, end))
 	log(fmt.Sprintf("timeout - %d", timeout))
+
+	if port != -1 {
+		start = port
+		end = start + 1
+	}
+
 	for i := start; i < end; i++ {
 		result := (&TCPLocation{host, i}).Scan()
 		log(fmt.Sprintf("result - %s", result))
