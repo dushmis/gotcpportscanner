@@ -64,8 +64,11 @@ func main() {
 	flag.IntVar(&start, "start", 20, "start")
 	flag.IntVar(&end, "end", 25, "end")
 	flag.IntVar(&timeout, "w", 5, "tcp timeout in seconds")
-	flag.BoolVar(&verbose, "v", false, "verbose")
 	flag.IntVar(&port, "p", -1, "specific port, this option ignores start/end flag")
+
+	flag.BoolVar(&verbose, "v", false, "verbose")
+
+	var so = flag.Bool("s", false, "verbose")
 
 	flag.Parse()
 
@@ -94,7 +97,9 @@ func main() {
 		if result.IsOpen {
 			fmt.Printf("\033[92mSUCCESS\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
 		} else {
-			fmt.Printf("\033[91mFAILURE\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+			if !*so {
+				fmt.Printf("\033[91mFAILURE\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+			}
 			if singlePort {
 				os.Exit(1)
 			}
