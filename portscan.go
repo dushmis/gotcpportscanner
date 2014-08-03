@@ -91,18 +91,35 @@ func main() {
 
 	host = IPAddr.IP.String()
 
+	var portRange int
+
+	if portRange = end - start; portRange < 0 {
+		log.Fatal("Invalid port range...")
+		os.Exit(3)
+	}
+
+	TCPLocations := make([]*TCPLocation, portRange)
+
+	j := 0
 	for i := start; i < end; i++ {
-		result := (&TCPLocation{host, i}).Scan()
-		_log_(fmt.Sprintf("result - %s", result))
-		if result.IsOpen {
-			fmt.Printf("\033[92mSUCCESS\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
-		} else {
-			if !*so {
-				fmt.Printf("\033[91mFAILURE\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+		TCPLocations[j] = (&TCPLocation{host, i})
+		j++
+	}
+
+	for i := range TCPLocations {
+		func(tcpLocation *TCPLocation) {
+			result := tcpLocation.Scan()
+			_log_(fmt.Sprintf("result - %s", result))
+			if result.IsOpen {
+				fmt.Printf("\033[92mSUCCESS\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+			} else {
+				if !*so {
+					fmt.Printf("\033[91mFAILURE\033[0m - %s:%d\n", result.TCPLocation.Host, result.TCPLocation.Port)
+				}
+				if singlePort {
+					os.Exit(1)
+				}
 			}
-			if singlePort {
-				os.Exit(1)
-			}
-		}
+		}(TCPLocations[i])
 	}
 }
