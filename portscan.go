@@ -38,9 +38,6 @@ func (this *TCPLocation) String() string {
 func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
-	// if !verbose {
-	// fmt.Printf("Scanning -- %s\n", p)
-	// }
 	_log_(fmt.Sprintf("Connecting %s", this))
 	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
 	if err != nil {
