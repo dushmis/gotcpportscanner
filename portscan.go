@@ -39,7 +39,7 @@ func (this *TCPLocation) Scan() *Result {
 	var p string
 	p = fmt.Sprintf("%s:%d", this.Host, this.Port)
 	_log_(fmt.Sprintf("Connecting %s", this))
-	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Second)
+	conn, err := net.DialTimeout("tcp", p, time.Duration(timeout)*time.Millisecond)
 	if err != nil {
 		_log_(fmt.Sprintf("Error %s", err.Error()))
 		return &Result{TCPLocation: this, Err: err.Error(), IsOpen: false}
@@ -60,7 +60,7 @@ func main() {
 	flag.StringVar(&host, "host", "localhost", "IP Address or host")
 	flag.IntVar(&start, "start", 20, "Starting port")
 	flag.IntVar(&end, "end", 25, "Ending port")
-	flag.IntVar(&timeout, "t", 5, "TCP timeout in seconds")
+	flag.IntVar(&timeout, "t", 5000, "TCP timeout in millisecond")
 	flag.IntVar(&port, "p", -1, "Specific port, this option ignores start/end flag")
 
 	flag.BoolVar(&verbose, "v", false, "verbose")
